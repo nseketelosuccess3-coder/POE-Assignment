@@ -285,7 +285,7 @@ public class User {
 
             Message msg = new Message(phoneNum, txt);
 
-            if (!msg.checkMessageLength()) {
+            if (!msg.checkMessageID()) {
                 System.out.println("Message is too long! Maximum 250 characters allowed.");
                 i--;
                 continue;
@@ -306,7 +306,7 @@ public class User {
                 continue;
             }
 
-            String sendResult = msg.SentMessage(opt);
+            String sendResult = msg.sentMessage(opt);
 
             System.out.println("\nResult: " + sendResult);
 
