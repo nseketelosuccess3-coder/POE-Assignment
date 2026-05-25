@@ -8,6 +8,8 @@ package poe.assignment;
  *
  * @author HP
  */
+import javax.swing.JOptionPane;
+
 import java.util.Scanner;
 
 public class User {
@@ -164,4 +166,69 @@ public class User {
        
        
     }
+            boolean running = true;
+        
+        while (running) {
+            String menu = "Choose option:\n1) Send Messages\n2) Show recently sent messages\n3) Quit";
+            String input = JOptionPane.showInputDialog(menu);
+            
+            if (input == null) {
+                running = false;
+                break;
+            }
+            
+            int choice = Integer.parseInt(input);
+            
+            if (choice == 1) {
+                String numMessages = JOptionPane.showInputDialog("How many messages do you want to send?");
+                if (numMessages == null) continue;
+                
+                int total = Integer.parseInt(numMessages);
+                
+                for (int i = 0; i < total; i = i + 1) {
+                    String phoneNum = JOptionPane.showInputDialog("Enter recipient number e.g. +27123456789");
+                    if (phoneNum == null) break;
+                    
+                    String txt = JOptionPane.showInputDialog("Enter your message");
+                    if (txt == null) break;
+                    
+                    Message msg = new Message(phoneNum, txt); // Only 2 things: phone and text
+                    
+                    if (!msg.checkMessageLength()) {
+                        JOptionPane.showMessageDialog(null, "Please enter a message of less than 250 characters.");
+                        i = i - 1; // Try again
+                        continue;
+                    }
+                    
+                    String result = msg.checkRecipientCell();
+                    JOptionPane.showMessageDialog(null, result);
+                    
+                    if (result.startsWith("Cell phone number is incorrectly")) {
+                        i = i - 1; // Try again
+                        continue;
+                    }
+                    
+                    String options = "Choose:\n1) Send Message\n2) Disregard Message\n3) Store Message";
+                    String optInput = JOptionPane.showInputDialog(options);
+                    if (optInput == null) break;
+                    
+                    int opt = Integer.parseInt(optInput);
+                    String sendResult = msg.SentMessage(opt);
+                    JOptionPane.showMessageDialog(null, sendResult);
+                    
+                    if (opt == 1) {
+                        JOptionPane.showMessageDialog(null, msg.printMessages());
+                    }
+                }
+                
+                JOptionPane.showMessageDialog(null, "Total messages sent: " + Message.returnTotalMessages());
+            }
+            else if (choice == 2) {
+                JOptionPane.showMessageDialog(null, "Coming Soon.");
+            }
+            else if (choice == 3) {
+                running = false;
+                JOptionPane.showMessageDialog(null, "Total messages sent: " + Message.returnTotalMessages());
+            }
+        }
 }
