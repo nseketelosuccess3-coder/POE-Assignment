@@ -1,15 +1,6 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
- */
 package poe.assignment;
 
-/**
- *
- * @author HP
- */
 import javax.swing.JOptionPane;
-
 import java.util.Scanner;
 
 public class User {
@@ -73,9 +64,13 @@ public class User {
                this.password.equals(enteredPassword);
     }
 
+    // Getters for the user information
+    public String getFirstName() { return firstName; }
+    public String getLastName() { return lastName; }
+    public String getUserName() { return userName; }
+
     // MAIN METHOD
     public static void main(String[] args) {
-
         Scanner scanner = new Scanner(System.in);
 
         System.out.println("==== REGISTRATION ====");
@@ -102,7 +97,6 @@ public class User {
                 System.out.println("Wrong username. It must contain '_' and be no more than 5 characters.");
             }
         }
-        
 
         // PASSWORD LOOP
         String password;
@@ -141,10 +135,7 @@ public class User {
         User user = new User(firstName, lastName, userName, password, cellPhoneNumber);
 
         System.out.println("\nRegistration successful!");
-        
 
-        
-        
         System.out.println(" LOGIN ");
 
         while (true) {
@@ -163,10 +154,14 @@ public class User {
         }
         System.out.println("\n");
 
-       
-       
+        // Start the messaging menu
+        messagingMenu();
+        scanner.close();
     }
-            boolean running = true;
+
+    // Messaging menu method
+    public static void messagingMenu() {
+        boolean running = true;
         
         while (running) {
             String menu = "Choose option:\n1) Send Messages\n2) Show recently sent messages\n3) Quit";
@@ -177,58 +172,98 @@ public class User {
                 break;
             }
             
-            int choice = Integer.parseInt(input);
+            int choice;
+            try {
+                choice = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Please enter a valid number (1-3)");
+                continue;
+            }
             
-            if (choice == 1) {
-                String numMessages = JOptionPane.showInputDialog("How many messages do you want to send?");
-                if (numMessages == null) continue;
-                
-                int total = Integer.parseInt(numMessages);
-                
-                for (int i = 0; i < total; i = i + 1) {
-                    String phoneNum = JOptionPane.showInputDialog("Enter recipient number e.g. +27123456789");
-                    if (phoneNum == null) break;
-                    
-                    String txt = JOptionPane.showInputDialog("Enter your message");
-                    if (txt == null) break;
-                    
-                    Message msg = new Message(phoneNum, txt); // Only 2 things: phone and text
-                    
-                    if (!msg.checkMessageLength()) {
-                        JOptionPane.showMessageDialog(null, "Please enter a message of less than 250 characters.");
-                        i = i - 1; // Try again
-                        continue;
-                    }
-                    
-                    String result = msg.checkRecipientCell();
-                    JOptionPane.showMessageDialog(null, result);
-                    
-                    if (result.startsWith("Cell phone number is incorrectly")) {
-                        i = i - 1; // Try again
-                        continue;
-                    }
-                    
-                    String options = "Choose:\n1) Send Message\n2) Disregard Message\n3) Store Message";
-                    String optInput = JOptionPane.showInputDialog(options);
-                    if (optInput == null) break;
-                    
-                    int opt = Integer.parseInt(optInput);
-                    String sendResult = msg.SentMessage(opt);
-                    JOptionPane.showMessageDialog(null, sendResult);
-                    
-                    if (opt == 1) {
-                        JOptionPane.showMessageDialog(null, msg.printMessages());
-                    }
-                }
-                
-                JOptionPane.showMessageDialog(null, "Total messages sent: " + Message.returnTotalMessages());
-            }
-            else if (choice == 2) {
-                JOptionPane.showMessageDialog(null, "Coming Soon.");
-            }
-            else if (choice == 3) {
-                running = false;
-                JOptionPane.showMessageDialog(null, "Total messages sent: " + Message.returnTotalMessages());
+            switch (choice) {
+                case 1:
+                    sendMessages();
+                    break;
+                case 2:
+                    JOptionPane.showMessageDialog(null, "Coming Soon.");
+                    break;
+                case 3:
+                    running = false;
+                    JOptionPane.showMessageDialog(null, "Goodbye!");
+                    break;
+                default:
+                    JOptionPane.showMessageDialog(null, "Invalid choice. Please enter 1, 2, or 3.");
             }
         }
+    }
+
+    // Method to send messages
+    public static void sendMessages() {
+        String numMessagesStr = JOptionPane.showInputDialog("How many messages do you want to send?");
+        if (numMessagesStr == null) return;
+        
+        int total;
+        try {
+            total = Integer.parseInt(numMessagesStr);
+            if (total <= 0) {
+                JOptionPane.showMessageDialog(null, "Please enter a positive number.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "Please enter a valid number.");
+            return;
+        }
+        
+        int sentCount = 0;
+        
+        for (int i = 0; i < total; i++) {
+            String phoneNum = JOptionPane.showInputDialog("Enter recipient number e.g. +27123456789");
+            if (phoneNum == null) break;
+            
+            String txt = JOptionPane.showInputDialog("Enter your message");
+            if (txt == null) break;
+            
+            Message msg = new Message(phoneNum, txt);
+            
+            // Check message length
+            if (!msg.checkMessageLength()) {
+                JOptionPane.showMessageDialog(null, "Please enter a message of less than 250 characters.");
+                i--; // Try again
+                continue;
+            }
+            
+            // Check recipient cell number
+            String result = msg.checkRecipientCell();
+            JOptionPane.showMessageDialog(null, result);
+            
+            if (result.startsWith("Cell phone number is incorrectly")) {
+                i--; // Try again
+                continue;
+            }
+            
+            // Ask what to do with the message
+            String options = "Choose:\n1) Send Message\n2) Disregard Message\n3) Store Message";
+            String optInput = JOptionPane.showInputDialog(options);
+            if (optInput == null) break;
+            
+            int opt;
+            try {
+                opt = Integer.parseInt(optInput);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Invalid choice. Please enter 1, 2, or 3.");
+                i--;
+                continue;
+            }
+            
+            String sendResult = msg.SentMessage(opt);
+            JOptionPane.showMessageDialog(null, sendResult);
+            
+            if (opt == 1) {
+                sentCount++;
+                JOptionPane.showMessageDialog(null, "Message sent successfully!");
+            }
+        }
+        
+        JOptionPane.showMessageDialog(null, "Total messages sent: " + sentCount);
+    }
 }
